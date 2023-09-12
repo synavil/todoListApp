@@ -7,13 +7,13 @@ import { Actions } from '@ngrx/effects';
 import { todosReducer } from './reducer';
 import { TodoService } from '../services/todo.service';
 import { cold, hot } from 'jasmine-marbles';
-import {loadTodos, loadTodosFailed, loadTodosSuccess} from './actions';
+import {changeTodoState, changeTodoStateFailed, changeTodoStateSuccess, loadTodos, loadTodosFailed, loadTodosSuccess} from './actions';
 import { Todo } from '../models/todo';
 
 describe('Effects', () => {
   let effects: Effects;
   let actions: Observable<Actions>;
-  const todoService = jasmine.createSpyObj<TodoService>('TodoService', ['list']);
+  const todoService = jasmine.createSpyObj<TodoService>('TodoService', ['list', 'update']);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -33,7 +33,7 @@ describe('Effects', () => {
 
   describe('loadTodos$', () => {
     it('should dispatch loadTodosSuccess action when todoService.list return a result', () => {
-      const mockedTodos: Todo[] = [{ title: 'aTitle', isClosed: true }];
+      const mockedTodos: Todo[] = [{ id: 1, title: 'aTitle', isClosed: true }];
       todoService.list.and.returnValue(of(mockedTodos));
 
       actions = hot('-a-', {
@@ -57,6 +57,36 @@ describe('Effects', () => {
       });
 
       expect(effects.loadTodos$).toBeObservable(expected);
+    });
+  });
+
+  describe('changeTodoState$', () => {
+    it('should dispatch changeTodoStateSuccess action when todoService.changeTodoState return a result', () => {
+      const todoToUpdate: Todo = { id: 1, title: 'aTitle', isClosed: true };
+      todoService.update.and.returnValue(of(todoToUpdate));
+
+      actions = hot('-a-', {
+        a: changeTodoState({ todo: todoToUpdate}),
+      });
+      const expected = cold('-b-', {
+        b: changeTodoStateSuccess({ todo: todoToUpdate }),
+      });
+
+      expect(effects.changeTodoState$).toBeObservable(expected);
+    });
+
+    it('should dispatch changeTodoStateFailed action when todoService.changeTodoState fails', () => {
+      const todoToUpdate: Todo = { id: 1, title: 'aTitle', isClosed: true };
+      todoService.update.and.returnValue(cold('#'));
+
+      actions = hot('-a-', {
+        a: changeTodoState({ todo : todoToUpdate }),
+      });
+      const expected = cold('-b-', {
+        b: changeTodoStateFailed(),
+      });
+
+      expect(effects.changeTodoState$).toBeObservable(expected);
     });
   });
 });

@@ -24,7 +24,7 @@ describe('TodoService', () => {
   });
 
   it('should list todos', (done: DoneFn) => {
-    const mockedTodoList: Todo[] = [{ title: 'todoTitle', isClosed: true }];
+    const mockedTodoList: Todo[] = [{ id: 1, title: 'todoTitle', isClosed: true }];
 
     service
       .list()
@@ -40,5 +40,24 @@ describe('TodoService', () => {
     expect(req.request.method).toEqual('GET');
 
     req.flush(mockedTodoList);
+  });
+
+  it('should update a todo', (done: DoneFn) => {
+    const updatedTodo: Todo = { id: 1, title: 'todoTitle', isClosed: true };
+
+    service
+      .update(updatedTodo)
+      .pipe(first())
+      .subscribe((res: Todo) => {
+        expect(res).toEqual(updatedTodo);
+        done();
+      }, done.fail);
+
+    const req = httpMock.expectOne(
+      (r) => r.url === `${environment.baseUrl}/api/todos/`
+    );
+    expect(req.request.method).toEqual('PUT');
+
+    req.flush(updatedTodo);
   });
 });

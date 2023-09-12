@@ -1,6 +1,6 @@
 import {Todo} from '../models/todo';
 import {createReducer, on} from '@ngrx/store';
-import {loadTodosSuccess} from './actions';
+import {changeTodoStateSuccess, loadTodosSuccess} from './actions';
 
 export const featureKey = 'todosStore';
 
@@ -19,6 +19,11 @@ export const todosReducer = createReducer(
     (state, { todos }) => ({
       ...state,
       todos
+    })
+  ),
+  on(changeTodoStateSuccess,
+    (state, { todo }) => ({
+      ...state, todos: [...state.todos.filter(todoListElement => todoListElement.id !== todo.id), todo]
     })
   ),
 );
