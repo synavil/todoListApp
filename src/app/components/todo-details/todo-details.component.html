@@ -1,0 +1,35 @@
+<a [routerLink]="['/']">
+  <button mat-button class="return-button">
+    <mat-icon>arrow_back</mat-icon>
+    Liste des tâches
+  </button>
+</a>
+<div class="container" *ngIf="_selectedTodo !== undefined; else loading">
+  <ng-container *ngIf="_selectedTodo !== null; else todoNotFound">
+    <mat-card>
+      <mat-card-title>{{ _selectedTodo.title }}</mat-card-title>
+      <mat-card-content>
+        <p>
+          <span class="label">Etat :</span>
+          {{ _selectedTodo.isClosed ? "A faire" : "Terminé" }}
+        </p>
+        <p>
+          <span class="label">Details :</span>
+          {{ _selectedTodo.details }}
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+  <ng-template #todoNotFound>
+    <div class="error-message">
+      <mat-icon class="error-icon">crisis_alert</mat-icon>
+      <p>
+        La tâche n'a pas pu être chargé.<br /><br />
+        La tâche n'existe pas ou une erreur est survenue.
+      </p>
+    </div>
+  </ng-template>
+</div>
+<ng-template #loading>
+  <mat-spinner class="loading"></mat-spinner>
+</ng-template>

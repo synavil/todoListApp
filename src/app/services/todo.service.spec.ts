@@ -8,6 +8,7 @@ import {
 import { first } from 'rxjs/operators';
 import { Todo } from '../models/todo';
 import { environment } from '../../environments/environment';
+import { MockDatas } from 'test/mocks';
 
 describe('TodoService', () => {
   let service: TodoService;
@@ -24,7 +25,7 @@ describe('TodoService', () => {
   });
 
   it('should list todos', (done: DoneFn) => {
-    const mockedTodoList: Todo[] = [{ id: 1, title: 'todoTitle', isClosed: true }];
+    const mockedTodoList: Todo[] = [MockDatas.todo1];
 
     service
       .list()
@@ -43,7 +44,7 @@ describe('TodoService', () => {
   });
 
   it('should update a todo', (done: DoneFn) => {
-    const updatedTodo: Todo = { id: 1, title: 'todoTitle', isClosed: true };
+    const updatedTodo: Todo = MockDatas.todo1;
 
     service
       .update(updatedTodo)
@@ -59,5 +60,24 @@ describe('TodoService', () => {
     expect(req.request.method).toEqual('PUT');
 
     req.flush(updatedTodo);
+  });
+
+  it('should get a todo', (done: DoneFn) => {
+    const todo: Todo = MockDatas.todo1;
+
+    service
+      .get(1)
+      .pipe(first())
+      .subscribe((res: Todo) => {
+        expect(res).toEqual(todo);
+        done();
+      }, done.fail);
+
+    const req = httpMock.expectOne(
+      (r) => r.url === `${environment.baseUrl}/api/todos/1`
+    );
+    expect(req.request.method).toEqual('GET');
+
+    req.flush(todo);
   });
 });

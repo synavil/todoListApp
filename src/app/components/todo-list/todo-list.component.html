@@ -1,0 +1,25 @@
+<div id="container" *ngIf="_todos !== undefined; else loading">
+  <mat-card>
+    <mat-card-title>Todos</mat-card-title>
+    <mat-card-content>
+      <mat-list>
+        <mat-list-item *ngFor="let todo of _todos">
+          <h4 matLine>
+            <mat-checkbox
+              [checked]="todo.isClosed"
+              (click)="todoStateChange(todo)"
+            ></mat-checkbox>
+            <a [routerLink]="['/details', todo.id]">
+              <span [ngClass]="{ closedTodo: todo.isClosed }">
+                {{ todo.title }}
+              </span>
+            </a>
+          </h4>
+        </mat-list-item>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+</div>
+<ng-template #loading>
+  <mat-spinner class="loading"></mat-spinner>
+</ng-template>

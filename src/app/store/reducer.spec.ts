@@ -1,6 +1,7 @@
 import * as fromReducer from './reducer';
 import { State } from './reducer';
-import { changeTodoStateSuccess, loadTodosSuccess } from './actions';
+import { changeTodoStateSuccess, loadSelectedTodoFailed, loadSelectedTodoSuccess, loadTodosFailed, loadTodosSuccess, unloadSelectedTodo } from './actions';
+import { MockDatas } from 'test/mocks';
 
 describe('Reducer', () => {
   describe('unknown action', () => {
@@ -18,10 +19,58 @@ describe('Reducer', () => {
   describe('loadTodosSuccess action', () => {
     it('should retrieve all todos and update the state', () => {
       const { initialState } = fromReducer;
-      const newState: State = { todos: [{ id: 1, title: 'aTitle', isClosed: false }] };
+      const newState: State = MockDatas.initialState;
       const action = loadTodosSuccess({
-        todos: [...newState.todos],
+        todos: [...MockDatas.initialState.todos],
       });
+
+      const state = fromReducer.todosReducer(initialState, action);
+
+      expect(state).toEqual(newState);
+      expect(state).not.toBe(newState);
+    });
+  });
+
+  describe('loadSelectedTodoSuccess action', () => {
+    it('should retrieve selected todo and update the state', () => {
+      const { initialState } = fromReducer;
+      const newState: State = {
+        ...initialState,
+        selectedTodo: MockDatas.todo1,
+      };
+      const action = loadSelectedTodoSuccess({ todo: MockDatas.todo1 });
+
+      const state = fromReducer.todosReducer(initialState, action);
+
+      expect(state).toEqual(newState);
+      expect(state).not.toBe(newState);
+    });
+  });
+
+  describe('loadSelectedTodoFailed action', () => {
+    it('should update the state with loadSelectedTodoActionState to FAILED', () => {
+      const { initialState } = fromReducer;
+      const newState: State = {
+        ...initialState,
+        selectedTodo: null,
+      };
+      const action = loadSelectedTodoFailed();
+
+      const state = fromReducer.todosReducer(initialState, action);
+
+      expect(state).toEqual(newState);
+      expect(state).not.toBe(newState);
+    });
+  });
+
+  describe('unloadSelectedTodo action', () => {
+    it('should update the state with loadSelectedTodoActionState to NEED_TO_BE_RUN and selectedTodo to undefined', () => {
+      const { initialState } = fromReducer;
+      const newState: State = {
+        ...initialState,
+        selectedTodo: undefined,
+      };
+      const action = unloadSelectedTodo();
 
       const state = fromReducer.todosReducer(initialState, action);
 
@@ -32,10 +81,27 @@ describe('Reducer', () => {
 
   describe('changeTodoStateSuccess action', () => {
     it('should update the state with the updated todo value', () => {
-      const initialState = { todos: [{ id: 1, title: 'aTitle1', isClosed: false }, { id: 2, title: 'aTitle2', isClosed: false }] };
-      const newState: State = { todos: [{ id: 2, title: 'aTitle2', isClosed: false }, { id: 1, title: 'aTitle1', isClosed: true }] };
+
+      const initialState = { ...MockDatas.initialState, todos: [MockDatas.todoNotClosed, MockDatas.todo1] };
+      const updatedTodo = {...MockDatas.todoNotClosed, isClosed: true};
+      const newState: State = { ...MockDatas.initialState, todos: [MockDatas.todo1, updatedTodo] };
       const action = changeTodoStateSuccess({
-        todo: { id: 1, title: 'aTitle1', isClosed: true },
+        todo: updatedTodo,
+      });
+
+      const state = fromReducer.todosReducer(initialState, action);
+
+      expect(state).toEqual(newState);
+      expect(state).not.toBe(newState);
+    });
+
+    it('should update the state with the updated todo value when todo list is undefined', () => {
+
+      const initialState = { ...MockDatas.initialState, todos: undefined };
+      const updatedTodo = {...MockDatas.todoNotClosed, isClosed: true};
+      const newState: State = { ...MockDatas.initialState, todos: [updatedTodo] };
+      const action = changeTodoStateSuccess({
+        todo: updatedTodo,
       });
 
       const state = fromReducer.todosReducer(initialState, action);

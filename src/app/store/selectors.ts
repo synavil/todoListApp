@@ -6,7 +6,12 @@ export const getState = createFeatureSelector<State>(featureKey);
 
 export const selectTodos = createSelector(
   getState,
-  (state: State) => [...state.todos].sort(compareTodoByClosedState),
+  (state: State) => state.todos ? [...state.todos].sort(compareTodoByClosedState) : undefined,
+);
+
+export const selectSelectedTodo = createSelector(
+  getState,
+  (state: State) => state.selectedTodo,
 );
 
 function compareTodoByClosedState(todoA: Todo, todoB: Todo): number {
