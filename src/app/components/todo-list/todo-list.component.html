@@ -19,6 +19,13 @@
       </mat-list>
     </mat-card-content>
   </mat-card>
+  <mat-card class="actions-card">
+    <a [routerLink]="['/create']">
+      <button mat-button color="primary" class="new-todo-btn">
+        Nouvelle tâche
+      </button>
+    </a>
+  </mat-card>
 </div>
 <ng-template #loading>
   <mat-spinner class="loading"></mat-spinner>

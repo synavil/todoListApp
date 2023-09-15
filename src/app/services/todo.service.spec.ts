@@ -80,4 +80,24 @@ describe('TodoService', () => {
 
     req.flush(todo);
   });
+
+  it('should create a todo', (done: DoneFn) => {
+    const newTodo: Todo = {...MockDatas.todo1, id: null};
+    const returnedTodo: Todo = {...newTodo, id: 8};
+
+    service
+      .create(newTodo)
+      .pipe(first())
+      .subscribe((res: Todo) => {
+        expect(res).toEqual(returnedTodo);
+        done();
+      }, done.fail);
+
+    const req = httpMock.expectOne(
+      (r) => r.url === `${environment.baseUrl}/api/todos/` && r.body === newTodo
+    );
+    expect(req.request.method).toEqual('POST');
+
+    req.flush(returnedTodo);
+  });
 });

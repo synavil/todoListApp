@@ -15,6 +15,23 @@ export const selectSelectedTodo = createSelector(
 );
 
 function compareTodoByClosedState(todoA: Todo, todoB: Todo): number {
-  return ((todoA.isClosed ? 1 : 0) - (todoB.isClosed ? 1 : 0));
+  let compareVal: number;
 
+  if(todoA.isClosed && todoB.isClosed && todoA.closingDate && todoB.closingDate){
+    compareVal = new Date(todoA.closingDate).getTime() - new Date(todoB.closingDate).getTime();
+  }
+  else if(!todoA.isClosed && todoB.isClosed){
+    compareVal = -1;
+  }
+  else if(todoA.isClosed && !todoB.isClosed){
+    compareVal = 1;
+  }
+  else if(!todoA.isClosed && !todoB.isClosed){
+    compareVal = new Date(todoB.creationDate).getTime() - new Date(todoA.creationDate).getTime();
+  }
+  else {
+    compareVal = 0;
+  }
+
+  return compareVal;
 }

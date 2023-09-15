@@ -29,5 +29,14 @@ export const loadSelectedTodoSuccess = createAction(
   props<{ todo: Todo }>()
 );
 export const loadSelectedTodoFailed = createAction('[Todos] Load selected todo failed');
-
 export const unloadSelectedTodo = createAction('[Todos] Unload selected todo')
+
+export const createNewTodo = createAction(
+  '[Todos] Create a new todo',
+  props<{ newTodo: Todo }>()
+);
+export const createNewTodoSuccess = createAction(
+  '[Todos] Create a new todo success',
+  props<{ newTodo: Todo }>()
+);
+export const createNewTodoFailed = createAction('[Todos] Create a new todo failed');

@@ -7,18 +7,25 @@ import { Actions } from '@ngrx/effects';
 import { todosReducer } from './reducer';
 import { TodoService } from '../services/todo.service';
 import { cold, hot } from 'jasmine-marbles';
-import {changeTodoState, changeTodoStateFailed, changeTodoStateSuccess, loadSelectedTodo, loadSelectedTodoFailed, loadSelectedTodoSuccess, loadTodos, loadTodosFailed, loadTodosSuccess} from './actions';
+import {changeTodoState, changeTodoStateFailed, changeTodoStateSuccess, createNewTodo, createNewTodoFailed, createNewTodoSuccess, loadSelectedTodo, loadSelectedTodoFailed, loadSelectedTodoSuccess, loadTodos, loadTodosFailed, loadTodosSuccess} from './actions';
 import { Todo } from '../models/todo';
 import { MockDatas } from 'test/mocks';
+import { Router, RouterModule } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('Effects', () => {
   let effects: Effects;
+  let router : Router;
   let actions: Observable<Actions>;
-  const todoService = jasmine.createSpyObj<TodoService>('TodoService', ['list', 'update', 'get']);
+  const todoService = jasmine.createSpyObj<TodoService>('TodoService', ['list', 'update', 'get', 'create']);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [StoreModule.forRoot({ todosStore: todosReducer })],
+      imports: [
+        StoreModule.forRoot({ todosStore: todosReducer }),
+        RouterModule.forRoot([]),
+        RouterTestingModule,
+      ],
       providers: [
         Effects,
         provideMockActions(() => actions),
@@ -30,6 +37,7 @@ describe('Effects', () => {
     });
 
     effects = TestBed.inject(Effects);
+    router = TestBed.inject(Router);
   });
 
   describe('loadTodos$', () => {
@@ -91,8 +99,22 @@ describe('Effects', () => {
   });
 
   describe('changeTodoState$', () => {
-    it('should dispatch changeTodoStateSuccess action when todoService.changeTodoState return a result', () => {
-      const todoToUpdate: Todo = MockDatas.todo1;
+    it('should dispatch changeTodoStateSuccess action when todoService.changeTodoState return a result with reopened todo', () => {
+      const todoToUpdate: Todo = {...MockDatas.todo1, isClosed: false};
+      todoService.update.and.returnValue(of(todoToUpdate));
+
+      actions = hot('-a-', {
+        a: changeTodoState({ todo: todoToUpdate}),
+      });
+      const expected = cold('-b-', {
+        b: changeTodoStateSuccess({ todo: todoToUpdate }),
+      });
+
+      expect(effects.changeTodoState$).toBeObservable(expected);
+    });
+
+    it('should dispatch changeTodoStateSuccess action when todoService.changeTodoState return a result with closed todo', () => {
+      const todoToUpdate: Todo = {...MockDatas.todo1, isClosed: true};
       todoService.update.and.returnValue(of(todoToUpdate));
 
       actions = hot('-a-', {
@@ -117,6 +139,56 @@ describe('Effects', () => {
       });
 
       expect(effects.changeTodoState$).toBeObservable(expected);
+    });
+  });
+
+  describe('createNewTodo$', () => {
+    it('should dispatch createNewTodoSuccess action when todoService.create return a result', () => {
+      const newTodo: Todo = {...MockDatas.todoNotClosed, id: null};
+      const returnTodo: Todo = {...newTodo, id: 7};
+      todoService.create.and.returnValue(of(returnTodo));
+
+      actions = hot('-a-', {
+        a: createNewTodo({ newTodo: newTodo}),
+      });
+      const expected = cold('-b-', {
+        b: createNewTodoSuccess({ newTodo: returnTodo }),
+      });
+
+      expect(effects.createNewTodo$).toBeObservable(expected);
+    });
+
+    it('should dispatch createNewTodoFailed action when todoService.create fails', () => {
+      const newTodo: Todo = {...MockDatas.todoNotClosed, id: null};
+      todoService.create.and.returnValue(cold('#'));
+
+      actions = hot('-a-', {
+        a: createNewTodo({ newTodo : newTodo }),
+      });
+      const expected = cold('-b-', {
+        b: createNewTodoFailed(),
+      });
+
+      expect(effects.createNewTodo$).toBeObservable(expected);
+    });
+  });
+
+  describe('createNewTodoSuccess$', () => {
+    it('should redirect to "/"', () => {
+      const newTodo: Todo = {...MockDatas.todoNotClosed, id: null};
+      spyOn(effects['router'], 'navigate');
+
+      actions = hot('-a-', {
+        a: createNewTodoSuccess({ newTodo: newTodo}),
+      });
+
+      const expected = cold('-b-', {
+        b: createNewTodoSuccess({ newTodo: newTodo}),
+      });
+
+    expect(effects.createTodoSuccess$).toBeObservable(expected);
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
+
     });
   });
 });

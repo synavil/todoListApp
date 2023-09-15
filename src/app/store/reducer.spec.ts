@@ -1,7 +1,8 @@
 import * as fromReducer from './reducer';
 import { State } from './reducer';
-import { changeTodoStateSuccess, loadSelectedTodoFailed, loadSelectedTodoSuccess, loadTodosFailed, loadTodosSuccess, unloadSelectedTodo } from './actions';
+import { changeTodoStateSuccess, createNewTodoSuccess, loadSelectedTodoFailed, loadSelectedTodoSuccess, loadTodosFailed, loadTodosSuccess, unloadSelectedTodo } from './actions';
 import { MockDatas } from 'test/mocks';
+import { Todo } from '../models/todo';
 
 describe('Reducer', () => {
   describe('unknown action', () => {
@@ -21,7 +22,7 @@ describe('Reducer', () => {
       const { initialState } = fromReducer;
       const newState: State = MockDatas.initialState;
       const action = loadTodosSuccess({
-        todos: [...MockDatas.initialState.todos],
+        todos: [...MockDatas.initialState.todos as Todo[]],
       });
 
       const state = fromReducer.todosReducer(initialState, action);
@@ -102,6 +103,38 @@ describe('Reducer', () => {
       const newState: State = { ...MockDatas.initialState, todos: [updatedTodo] };
       const action = changeTodoStateSuccess({
         todo: updatedTodo,
+      });
+
+      const state = fromReducer.todosReducer(initialState, action);
+
+      expect(state).toEqual(newState);
+      expect(state).not.toBe(newState);
+    });
+  });
+
+  describe('createNewTodoSuccess action', () => {
+    it('should update the state with the new todo added at top', () => {
+
+      const initialState = { ...MockDatas.initialState, todos: [MockDatas.todoNotClosed, MockDatas.todo1] };
+      const newTodo = MockDatas.todo3;
+      const newState: State = { ...MockDatas.initialState, todos: [newTodo, MockDatas.todoNotClosed, MockDatas.todo1] };
+      const action = createNewTodoSuccess({
+        newTodo: newTodo,
+      });
+
+      const state = fromReducer.todosReducer(initialState, action);
+
+      expect(state).toEqual(newState);
+      expect(state).not.toBe(newState);
+    });
+
+    it('should update the state with the new todo added at top when todo list is undefined', () => {
+
+      const initialState = { ...MockDatas.initialState, todos: undefined };
+      const newTodo = MockDatas.todo3;
+      const newState: State = { ...MockDatas.initialState, todos: [newTodo] };
+      const action = createNewTodoSuccess({
+        newTodo: newTodo,
       });
 
       const state = fromReducer.todosReducer(initialState, action);

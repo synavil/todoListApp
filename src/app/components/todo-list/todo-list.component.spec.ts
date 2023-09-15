@@ -116,4 +116,8 @@ describe('TodoListComponent', () => {
   it('shoul navigate to "/details/:id" when clic on todo title', () => {
     expect(ngMocks.find('mat-list mat-list-item:nth-of-type(2) a[href="/details/2"] span')).toBeTruthy();
   });
+
+  it('shoul navigate to "/create" when clic on "Nouvelle tâche" button', () => {
+    expect(ngMocks.find('mat-card.actions-card a[href="/create"] button.new-todo-btn')).toBeTruthy();
+  });
 });

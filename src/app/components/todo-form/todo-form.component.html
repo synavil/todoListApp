@@ -1,0 +1,26 @@
+<div class="container">
+  <mat-card>
+    <mat-card-title> Nouvelle tâche </mat-card-title>
+    <form class="todo-form" [formGroup]="todoFormGroup" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="standard">
+        <mat-label>Titre</mat-label>
+        <input matInput formControlName="title" required />
+        <mat-error *ngIf="todoFormGroup.get('title')?.invalid"
+          >Le titre ne doit pas être vide.</mat-error
+        >
+      </mat-form-field>
+      <mat-form-field appearance="standard">
+        <mat-label>Détails</mat-label>
+        <textarea matInput formControlName="details"></textarea>
+      </mat-form-field>
+      <button type="submit" mat-raised-button [disabled]="submitLoading">
+        Soumettre
+        <mat-spinner
+          *ngIf="submitLoading"
+          class="submitLoading"
+          diameter="24"
+        ></mat-spinner>
+      </button>
+    </form>
+  </mat-card>
+</div>
